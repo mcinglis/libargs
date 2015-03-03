@@ -135,6 +135,38 @@ find_option_short_match( ArrayC_ArgOption const options,
 
 
 static
+bool
+over_or_eq_max( ArgsNum const argsnum,
+                size_t const i )
+{
+    if ( argsnum.max == ArgsNum_NONE ) {
+        return true;
+    } else if ( argsnum.max == ArgsNum_INFINITE ) {
+        return false;
+    } else {
+        ASSERT( argsnum.max >= 0 );
+        uint const max = ( argsnum.max == 0 ) ? 1 : argsnum.max;
+        return i >= max;
+    }
+}
+
+
+static
+bool
+under_min( ArgsNum const argsnum,
+           size_t const i )
+{
+    if ( argsnum.min == ArgsNum_NONE ) {
+        return false;
+    } else {
+        ASSERT( argsnum.min >= 0 );
+        uint const min = ( argsnum.min == 0 ) ? 1 : argsnum.min;
+        return i < min;
+    }
+}
+
+
+static
 size_t
 parse_option_args( ArgOption const opt,
                    char const * const arg_name,
@@ -144,11 +176,9 @@ parse_option_args( ArgOption const opt,
     ASSERT( arrayc_str__is_valid( args ), err != NULL );
 
     errno = 0;
-    size_t const max_args =
-        ( opt.num_args.max == 0 ) ? 1 : opt.num_args.max;
     size_t i = 0;
     for ( ; i < args.length; i++ ) {
-        if ( i == max_args ) {
+        if ( over_or_eq_max( opt.num_args, i ) ) {
             break;
         }
         char const * const arg = args.e[ i ];
@@ -164,7 +194,7 @@ parse_option_args( ArgOption const opt,
             return i;
         }
     }
-    if ( i < opt.num_args.min ) {
+    if ( under_min( opt.num_args, i ) ) {
         *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
                               .str  = opt.long_name };
     }

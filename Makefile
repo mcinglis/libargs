@@ -80,6 +80,7 @@ examples: $(examples_binaries)
 
 
 examples/demo: \
+    $(DEPS_DIR)/libbase/bool.o \
     $(DEPS_DIR)/libbase/char.o \
     $(DEPS_DIR)/libbase/int.o \
     $(DEPS_DIR)/libstr/str.o \

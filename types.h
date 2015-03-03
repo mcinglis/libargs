@@ -68,9 +68,16 @@ typedef struct argflag {
 
 
 typedef struct argsnum {
-    size_t min;
-    size_t max;
+    int min;
+    int max;
 } ArgsNum;
+
+
+// Special values of `ArgsNum`'s fields
+enum {
+    ArgsNum_NONE     = -1,
+    ArgsNum_INFINITE = -2
+};
 
 
 typedef struct argoption {

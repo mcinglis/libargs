@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 
+#include <libbase/bool.h>
 #include <libbase/int.h>
 
 #include "../arg-parse.h"
@@ -27,14 +28,15 @@ main( int const argc,
       char const * const * const argv )
 {
     ArgsError err = { .type = ArgsError_NONE };
-    char const * str = "test";
+    char const * something = "test";
     bool * foo = false;
     bool * bar = true;
+    char const * bazqux = NULL;
     int widgets[ MAX_WIDGETS ] = { 0 };
     arg_parse( argc, argv, &err, ( ArgSpec ){
         .positionals = ARRAY_ARGPOSITIONAL(
             { .name = "something",
-              .destination = &str }
+              .destination = &something }
         ),
         .flags = ARRAY_ARGFLAG(
             { .short_name = "f",
@@ -47,18 +49,23 @@ main( int const argc,
             }
         ),
         .options = ARRAY_ARGOPTION(
-            { .short_name = "w",
-              .long_name = "widgets",
-              .parser = parse_widgets,
+            { .short_name  = "b",
+              .long_name   = "bazqux",
+              .destination = &bazqux
+            },
+            { .short_name  = "w",
+              .long_name   = "widgets",
+              .parser      = parse_widgets,
               .destination = widgets,
-              .num_args = { .min = 2, .max = MAX_WIDGETS }
+              .num_args    = { .min = 2, .max = MAX_WIDGETS }
             }
         )
     } );
     if ( err.type == ArgsError_NONE ) {
-        printf( "str = %s\n", str );
-        printf( "foo = %s\n", foo ? "true" : "false" );
-        printf( "bar = %s\n", bar ? "true" : "false" );
+        printf( "something = %s\n", something );
+        printf( "foo = %s\n", str__from_bool( foo ) );
+        printf( "bar = %s\n", str__from_bool( foo ) );
+        printf( "bazqux = %s\n", bazqux );
         printf( "widgets = %d %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ],
                 widgets[ 3 ], widgets[ 4 ] );
