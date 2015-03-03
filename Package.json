@@ -1,0 +1,14 @@
+{
+    "dependencies": [
+        { "repo": "https://gitorious.org/mcinglis/render-jinja.git" },
+        { "repo": "https://gitorious.org/mcinglis/libtypes.git",
+          "tag":  "v3.*" },
+        { "repo": "https://gitorious.org/mcinglis/libbase.git" },
+        { "repo": "https://gitorious.org/mcinglis/libstr.git" }
+    ],
+    "commands": {
+        "build": "make",
+        "fast":  "make fast",
+        "clean": "make clean"
+    }
+}
