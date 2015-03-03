@@ -39,7 +39,7 @@ See [`examples/demo.c`](examples/demo.c) for a full example.
 
 ## Releases
 
-I'll tag the releases according to [semantic versioning](http://semver.org/spec/v2.0.0.html). All the macros preceded by `// @public` are considered public: they'll only change between major versions. The other macros could change any time. Non-preprocessor identifiers defined in header files are always considered public. New identifiers prefixed with `maybe` (any case) will not warrant a major version bump.
+I'll tag the releases according to [semantic versioning](http://semver.org/spec/v2.0.0.html). All the macros preceded by `// @public` are considered public: they'll only change between major versions. The other macros could change any time. Non-preprocessor identifiers defined in header files are always considered public. New identifiers prefixed with `arg` (any case) will not warrant a major version bump.
 
 Every version tag will be signed with [my GPG key](http://pool.sks-keyservers.net/pks/lookup?op=vindex&search=0xD020F814) (fingerprint: `0xD020F814`).
 
@@ -58,9 +58,9 @@ There's nothing magic to what Puck does, so if you would prefer, you can set up 
 
 ## Collaboration
 
-Libargs is available at [Gitorious](https://gitorious.org/mcinglis/libmaybe), [Bitbucket](https://bitbucket.org/mcinglis/libmaybe), and [GitHub](https://github.com/mcinglis/libmaybe).
+Libargs is available at [Gitorious](https://gitorious.org/mcinglis/libargs), [Bitbucket](https://bitbucket.org/mcinglis/libargs), and [GitHub](https://github.com/mcinglis/libargs).
 
-Questions, discussion, bug reports and feature requests are welcome at [the GitHub issue tracker](https://github.com/mcinglis/libmaybe/issues), or via [emails](mailto:me@minglis.id.au).
+Questions, discussion, bug reports and feature requests are welcome at [the GitHub issue tracker](https://github.com/mcinglis/libargs/issues), or via [emails](mailto:me@minglis.id.au).
 
 To contribute changes, you're welcome to [email me](mailto:me@minglis.id.au) patches as per `git format-patch`, or to send me a pull request on any of the aforementioned sites. You're also welcome to just send me a link to your remote repository, and I'll merge stuff from that as I want to.
 

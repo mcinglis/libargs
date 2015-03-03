@@ -102,16 +102,19 @@ typedef struct arrayc_argoption {
 } ArrayC_ArgOption;
 
 
+// @public
 #define ARRAY_ARGPOSITIONAL( ... ) \
     { .e      = ( ArgPositional[] ){ __VA_ARGS__ }, \
       .length = NELEM( ( ArgPositional[] ){ __VA_ARGS__ } ) }
 
 
+// @public
 #define ARRAY_ARGFLAG( ... ) \
     { .e      = ( ArgFlag[] ){ __VA_ARGS__ }, \
       .length = NELEM( ( ArgFlag[] ){ __VA_ARGS__ } ) }
 
 
+// @public
 #define ARRAY_ARGOPTION( ... ) \
     { .e      = ( ArgOption[] ){ __VA_ARGS__ }, \
       .length = NELEM( ( ArgOption[] ){ __VA_ARGS__ } ) }
