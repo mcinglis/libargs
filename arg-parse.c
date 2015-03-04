@@ -284,7 +284,7 @@ arg_parse_array( ArrayC_str const args,
             }
         // Or, if we have outstanding positional arguments:
         } else if ( npos < spec.positionals.length ) {
-            ArgPositional const ap = spec.positionals.e[ i ];
+            ArgPositional const ap = spec.positionals.e[ npos ];
             ( ap.parser ? ap.parser : arg_parse_str )
                 ( ap.name, arg, ap.destination );
             if ( errno ) {

@@ -64,7 +64,7 @@ main( int const argc,
     if ( err.type == ArgsError_NONE ) {
         printf( "something = %s\n", something );
         printf( "foo = %s\n", str__from_bool( foo ) );
-        printf( "bar = %s\n", str__from_bool( foo ) );
+        printf( "bar = %s\n", str__from_bool( bar ) );
         printf( "bazqux = %s\n", bazqux );
         printf( "widgets = %d %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ],
