@@ -290,7 +290,7 @@ arg_parse_array( ArrayC_str const args,
             if ( errno ) {
                 *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
                                       .error = errno,
-                                      .str   = arg };
+                                      .str   = ap.name ? ap.name : arg };
                 return;
             }
             npos++;
