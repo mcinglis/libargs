@@ -194,7 +194,7 @@ parse_option_args( ArgOption const opt,
     }
     if ( under_min( opt.num_args, i ) ) {
         *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
-                              .str  = opt.long_name };
+                              .str  = arg_name };
     }
     return i;
 }
@@ -288,7 +288,7 @@ arg_parse_array( ArrayC_str const args,
             if ( errno ) {
                 *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
                                       .error = errno,
-                                      .str   = ap.name ? ap.name : arg };
+                                      .str   = arg };
                 return;
             }
             npos++;
