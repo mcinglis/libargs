@@ -1,5 +1,3 @@
-arg-parse/*.c
-arg-parse/*.h
 *.o
 *.dep.mk
 deps

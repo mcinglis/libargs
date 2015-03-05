@@ -31,12 +31,10 @@ arg_parse_str( char const * const _,
                char const * const arg,
                void * const vdest )
 {
-    if ( arg == NULL ) {
-        errno = EINVAL;
-    } else if ( vdest != NULL ) {
-        char const * * const dest = vdest;
-        *dest = arg;
-    }
+    ASSERT( arg != NULL, vdest != NULL );
+
+    char const * * const dest = vdest;
+    *dest = arg;
 }
 
 
@@ -45,10 +43,10 @@ arg_set_false( char const * const _1,
                char const * const _2,
                void * const vdest )
 {
-    if ( vdest != NULL ) {
-        bool * const dest = vdest;
-        *dest = false;
-    }
+    ASSERT( vdest != NULL );
+
+    bool * const dest = vdest;
+    *dest = false;
 }
 
 
@@ -57,10 +55,10 @@ arg_set_true( char const * const _1,
               char const * const _2,
               void * const vdest )
 {
-    if ( vdest != NULL ) {
-        bool * const dest = vdest;
-        *dest = true;
-    }
+    ASSERT( vdest != NULL );
+
+    bool * const dest = vdest;
+    *dest = true;
 }
 
 

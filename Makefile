@@ -22,30 +22,7 @@ PYTHON ?= python
 RENDER_JINJA_SCRIPT ?= $(DEPS_DIR)/render-jinja/render_jinja.py
 RENDER_JINJA ?= $(PYTHON) $(RENDER_JINJA_SCRIPT)
 
-uc = $(shell echo $(1) | tr [:lower:] [:upper:])
-
-types := bool ord char schar uchar short ushort int uint long ulong \
-         llong ullong int8 uint8 int16 uint16 int32 uint32 \
-         intmax uintmax ptrdiff wchar size
-
-int8_type    := int8_t
-uint8_type   := uint8_t
-int16_type   := int16_t
-uint16_type  := uint16_t
-int32_type   := int32_t
-uint32_type  := uint32_t
-intmax_type  := intmax_t
-uintmax_type := uintmax_t
-ptrdiff_type := ptrdiff_t
-wchar_type   := wchar_t
-size_type    := size_t
-ptr_type     := void const *
-ptrm_type    := void *
-
-arg_parse_headers := $(foreach t,$(types),arg-parse/$t.h)
-arg_parse_sources := $(foreach t,$(types),arg-parse/$t.c)
-
-sources  := $(wildcard *.c) $(arg_parse_sources)
+sources  := $(wildcard *.c)
 objects  := $(sources:.c=.o)
 mkdeps   := $(sources:.c=.dep.mk)
 
@@ -71,10 +48,6 @@ fast: all
 objects: $(objects)
 
 
-libargs.o: $(objects)
-	$(LD) -r $^ -o $@
-
-
 .PHONY: examples
 examples: $(examples_binaries)
 
@@ -88,25 +61,9 @@ examples/demo: \
     arg-parse.o
 
 
-$(arg_parse_headers) $(arg_parse_sources): $(RENDER_JINJA_SCRIPT)
-
-$(arg_parse_sources): %.c: %.h
-
-$(arg_parse_headers): arg-parse/%.h: arg-parse/header.h.jinja
-	$(eval n := $*)
-	$(eval N := $(call uc,$n))
-	$(RENDER_JINJA) $< "include_guard=LIBARGS_ARG_PARSE_$N_H" "sys_headers=" "rel_headers=" "funcname=$n" -o $@
-
-$(arg_parse_sources): %.c: %.h
-$(arg_parse_sources): arg-parse/%.c: arg-parse/source.c.jinja
-	$(eval n := $*)
-	$(eval N := $(call uc,$n))
-	$(RENDER_JINJA) $< "header=$n.h" "sys_headers=libbase/$n.h" "rel_headers=" "type=$(or $($(n)_type),$n)" "funcname=$n" -o $@
-
-
 .PHONY: clean
 clean:
-	rm -rf $(arg_parse_headers) $(arg_parse_sources) $(objects) libargs.o $(mkdeps) $(examples_binaries)
+	rm -rf $(objects) $(mkdeps) $(examples_binaries)
 
 
 %.o: %.c
