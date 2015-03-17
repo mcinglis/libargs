@@ -308,7 +308,7 @@ arg_parse_array( ArrayC_str const args,
 
 
 char const *
-str__from_argserrortype( enum ArgsErrorType const t )
+argserrortype__to_str( enum ArgsErrorType const t )
 {
     switch ( t ) {
         case ArgsError_NONE:               return "none";

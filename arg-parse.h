@@ -58,7 +58,7 @@ arg_parse_array( ArrayC_str args,
 
 
 char const *
-str__from_argserrortype( enum ArgsErrorType );
+argserrortype__to_str( enum ArgsErrorType );
 
 
 #endif

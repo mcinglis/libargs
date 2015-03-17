@@ -1,5 +1,7 @@
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <libbase/bool.h>
 #include <libbase/int.h>
@@ -63,15 +65,16 @@ main( int const argc,
     } );
     if ( err.type == ArgsError_NONE ) {
         printf( "something = %s\n", something );
-        printf( "foo = %s\n", str__from_bool( foo ) );
-        printf( "bar = %s\n", str__from_bool( bar ) );
+        printf( "foo = %s\n", bool__to_str( foo ) );
+        printf( "bar = %s\n", bool__to_str( bar ) );
         printf( "bazqux = %s\n", bazqux );
         printf( "widgets = %d %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ],
                 widgets[ 3 ], widgets[ 4 ] );
     } else {
-        printf( "ERROR! %s (str=%s)\n",
-                str__from_argserrortype( err.type ), err.str );
+        printf( "ERROR! %s (str=%s) (errno=%d (%s))\n",
+                argserrortype__to_str( err.type ), err.str,
+                errno, strerror( errno ) );
     }
 }
 
