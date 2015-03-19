@@ -3,22 +3,21 @@
 ### VARIABLES
 ##############################
 
-DEPS_DIR ?= ./deps
+DEPS_DIR ?= deps
 
-LIBBASE ?= $(DEPS_DIR)/libbase
-LIBSTR ?= $(DEPS_DIR)/libstr
-LIBMAYBE ?= $(DEPS_DIR)/libmaybe
-LIBARRAY ?= $(DEPS_DIR)/libarray
+LIBBASE  := $(DEPS_DIR)/libbase
+LIBSTR   := $(DEPS_DIR)/libstr
+LIBMAYBE := $(DEPS_DIR)/libmaybe
+LIBARRAY := $(DEPS_DIR)/libarray
 
 CPPFLAGS += -I$(DEPS_DIR)
 
-cflags_std := -std=c11
-cflags_warnings := -Wall -Wextra -pedantic \
-                   -Wcomments -Wformat=2 -Wlogical-op -Wmissing-include-dirs \
-                   -Wnested-externs -Wold-style-definition -Wredundant-decls \
-                   -Wshadow -Wstrict-prototypes -Wunused-macros -Wvla \
-                   -Wwrite-strings \
-                   -Wno-unused-parameter
+CFLAGS ?= -std=c11 -g \
+          -Wall -Wextra -pedantic \
+          -Wcomments -Wformat=2 -Wlogical-op -Wmissing-include-dirs \
+          -Wnested-externs -Wold-style-definition -Wredundant-decls \
+          -Wshadow -Wstrict-prototypes -Wunused-macros -Wvla -Wwrite-strings \
+          -Wno-unused-parameter
 
 CFLAGS ?= $(cflags_std) -g $(cflags_warnings)
 
@@ -71,8 +70,7 @@ sources  := $(wildcard *.c)
 objects  := $(sources:.c=.o)
 mkdeps   := $(sources:.c=.dep.mk)
 
-examples_sources  := $(wildcard examples/*.c)
-examples_binaries := $(examples_sources:.c=)
+examples := $(basename $(wildcard examples/*.c))
 
 
 ##############################
@@ -82,20 +80,15 @@ examples_binaries := $(examples_sources:.c=)
 .PHONY: all
 all: objects examples
 
-.PHONY: fast
-fast: CPPFLAGS += -DNDEBUG
-fast: CFLAGS = $(cflags_std) -O3 $(cflags_warnings)
-fast: all
-
 .PHONY: objects
 objects: $(objects)
 
 .PHONY: examples
-examples: $(examples_binaries)
+examples: $(examples)
 
 .PHONY: clean
 clean:
-	rm -rf $(objects) $(mkdeps) $(examples_binaries) $(gen)
+	rm -rf $(objects) $(mkdeps) $(examples) $(gen)
 
 
 %.o: %.c
