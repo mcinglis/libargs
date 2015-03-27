@@ -137,11 +137,14 @@ bool
 over_or_eq_max( ArgsNum const argsnum,
                 size_t const i )
 {
-    if ( argsnum.max == ArgsNum_INFINITE ) {
+    if ( argsnum.max == ArgsNum_NONE ) {
+        return true;
+    } else if ( argsnum.max == ArgsNum_INFINITE ) {
         return false;
     } else {
         ASSERT( argsnum.max >= 0 );
-        return i >= ( uint ) argsnum.max;
+        uint const max = ( argsnum.max == 0 ) ? 1 : argsnum.max;
+        return i >= max;
     }
 }
 
@@ -151,11 +154,12 @@ bool
 under_min( ArgsNum const argsnum,
            size_t const i )
 {
-    if ( argsnum.min == ArgsNum_INFINITE ) {
-        return true;
+    if ( argsnum.min == ArgsNum_NONE ) {
+        return false;
     } else {
         ASSERT( argsnum.min >= 0 );
-        return i < ( uint ) argsnum.min;
+        uint const min = ( argsnum.min == 0 ) ? 1 : argsnum.min;
+        return i < min;
     }
 }
 

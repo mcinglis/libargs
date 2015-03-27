@@ -68,14 +68,15 @@ typedef struct argflag {
 
 
 typedef struct argsnum {
-    int min;
-    int max;
+    int min; // 0 is treated as 1; use ArgsNum_NONE for 0
+    int max; // 0 is treated as 1; use ArgsNum_NONE for 0
 } ArgsNum;
 
 
 // Special values of `ArgsNum`'s fields
 enum {
-    ArgsNum_INFINITE = -1
+    ArgsNum_NONE     = -1,
+    ArgsNum_INFINITE = -2
 };
 
 
