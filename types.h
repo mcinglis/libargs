@@ -75,8 +75,7 @@ typedef struct argsnum {
 
 // Special values of `ArgsNum`'s fields
 enum {
-    ArgsNum_NONE     = -1,
-    ArgsNum_INFINITE = -2
+    ArgsNum_INFINITE = -1
 };
 
 
