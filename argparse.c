@@ -17,7 +17,7 @@
 // along with Libargs. If not, see <https://gnu.org/licenses/>.
 
 
-#include "arg-parse.h"
+#include "argparse.h"
 
 #include <errno.h>
 
@@ -200,23 +200,60 @@ parse_option_args( ArgOption const opt,
 }
 
 
-void
-arg_parse( int const argc,
-           char const * const * const argv,
-           ArgsError * const err,
-           ArgSpec const spec )
+static
+size_t
+parse_positional_args( ArgPositional const ap,
+                       ArrayC_str const args,
+                       ArgsError * const err )
 {
-    ASSERT( argc >= 1, argv != NULL, err != NULL );
+    ASSERT( arrayc_str__is_valid( args ), err != NULL );
 
-    ArrayC_str const args = { .e = argv + 1, .length = argc - 1 };
-    arg_parse_array( args, err, spec );
+    errno = 0;
+    size_t i = 0;
+    for ( ; i < args.length; i++ ) {
+        if ( over_or_eq_max( ap.num_args, i ) ) {
+            break;
+        }
+        char const * const arg = args.e[ i ];
+        if ( str__is_prefix( arg, "-" ) ) {
+            break;
+        }
+        ( ap.parser ? ap.parser : arg_parse_str )
+            ( ap.name, arg, ap.destination );
+        if ( errno ) {
+            *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
+                                  .error = errno,
+                                  .str   = arg };
+            return i;
+        }
+    }
+    if ( under_min( ap.num_args, i ) ) {
+        *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
+                              .str  = ap.name };
+    }
+    return i;
 }
 
 
 void
-arg_parse_array( ArrayC_str const args,
-                 ArgsError * const err,
-                 ArgSpec const spec )
+argparse(
+        int const argc,
+        char const * const * const argv,
+        ArgsError * const err,
+        ArgsSpec const spec )
+{
+    ASSERT( argc >= 1, argv != NULL, err != NULL );
+
+    ArrayC_str const args = { .e = argv + 1, .length = argc - 1 };
+    argparse_array( args, err, spec );
+}
+
+
+void
+argparse_array(
+        ArrayC_str const args,
+        ArgsError * const err,
+        ArgsSpec const spec )
 {
     ASSERT( arrayc_str__is_valid( args ), err != NULL );
 
@@ -283,14 +320,9 @@ arg_parse_array( ArrayC_str const args,
         // Or, if we have outstanding positional arguments:
         } else if ( npos < spec.positionals.length ) {
             ArgPositional const ap = spec.positionals.e[ npos ];
-            ( ap.parser ? ap.parser : arg_parse_str )
-                ( ap.name, arg, ap.destination );
-            if ( errno ) {
-                *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
-                                      .error = errno,
-                                      .str   = arg };
-                return;
-            }
+            ArrayC_str const rest = arrayc_str__drop( args, i );
+            i += parse_positional_args( ap, rest, err );
+            if ( err->type != ArgsError_NONE ) { return; }
             npos++;
             continue;
         }

@@ -6,7 +6,7 @@
 #include <libbase/bool.h>
 #include <libbase/int.h>
 
-#include "../arg-parse.h"
+#include <argparse.h>
 
 
 #define MAX_WIDGETS 4
@@ -37,9 +37,9 @@ main( int const argc,
     bool * foo = false;
     bool * bar = true;
     char const * bazqux = NULL;
-    int widgets[ MAX_WIDGETS ] = { 0 };
+    int widgets[ MAX_WIDGETS ] = { 9999, 9999, 9999, 9999 };
     bool got_help_flag = false;
-    arg_parse( argc, argv, &err, ( ArgSpec ){
+    argparse( argc, argv, &err, ( ArgsSpec ){
         .positionals = ARRAY_ARGPOSITIONAL(
             { .name = "something",
               .destination = &something }
@@ -80,11 +80,11 @@ main( int const argc,
         printf( "something = %s\n", something );
         printf( "foo = %s\n", bool__to_str( foo ) );
         printf( "bar = %s\n", bool__to_str( bar ) );
-        printf( "bazqux = %s\n", bazqux );
+        printf( "bazqux = %s\n", bazqux ? bazqux : "(null)" );
         printf( "widgets = %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ], widgets[ 3 ] );
     } else {
-        printf( "ERROR! %s (str=%s) (errno=%d (%s))\n",
+        printf( "ERROR! %s (str=%s) (errno=%d (%s)); use --help\n",
                 argserrortype__to_str( err.type ), err.str,
                 errno, strerror( errno ) );
     }

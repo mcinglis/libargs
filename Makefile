@@ -10,7 +10,7 @@ LIBSTR   := $(DEPS_DIR)/libstr
 LIBMAYBE := $(DEPS_DIR)/libmaybe
 LIBARRAY := $(DEPS_DIR)/libarray
 
-CPPFLAGS += -I$(DEPS_DIR)
+CPPFLAGS += -I. -I$(DEPS_DIR)
 
 CFLAGS ?= -std=c11 -g \
           -Wall -Wextra -pedantic \
@@ -26,7 +26,7 @@ TPLRENDER ?= $(DEPS_DIR)/tplrender/tplrender
 
 libbase_types  := size bool int
 libmaybe_types := size
-libarray_types := str
+libarray_types := str argpositional argflag argoption
 
 size_type    := size_t
 size_options := --typeclasses BOUNDED EQ ORD ENUM NUM FROM_STR TO_STRM \
@@ -36,14 +36,23 @@ bool_type    := bool
 bool_options := --typeclasses BOUNDED EQ ORD ENUM FROM_STR TO_STR \
                 --extra min_bound=false max_bound=true
 
-int_type := int
+int_type    := int
 int_options := --typeclasses BOUNDED EQ ORD ENUM NUM FROM_STR TO_STRM \
                --extra num_type=signed
-
 
 str_type    := char const *
 str_options := --typename str --typeclasses EQ ORD
 str_func_header := libstr/str.h
+
+argpositional_type       := ArgPositional
+argpositional_def_header := def/argpositional.h
+
+argflag_type       := ArgFlag
+argflag_def_header := def/argflag.h
+
+argoption_type       := ArgOption
+argoption_def_header := def/argoption.h
+
 
 libbase_sources := $(foreach t,$(libbase_types),$(LIBBASE)/$t.c)
 libbase_headers := $(libbase_sources:.c=.h)
@@ -78,13 +87,7 @@ examples := $(basename $(wildcard examples/*.c))
 ##############################
 
 .PHONY: all
-all: objects examples
-
-.PHONY: objects
-objects: $(objects)
-
-.PHONY: examples
-examples: $(examples)
+all: $(examples)
 
 .PHONY: clean
 clean:
@@ -95,9 +98,15 @@ clean:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -MF "$(@:.o=.dep.mk)" -c $< -o $@
 
 
-arg-parse.o: $(LIBMAYBE)/def/maybe-size.h \
-             $(LIBARRAY)/def/array-str.h \
-             $(LIBARRAY)/array-str.h
+array_headers = $(LIBARRAY)/def/array-$1.h \
+                $(LIBARRAY)/array-$1.h
+
+argparse.o: $(LIBMAYBE)/def/maybe-size.h \
+            $(LIBARRAY)/def/array-str.h \
+            $(call array_headers,str) \
+            $(call array_headers,argpositional) \
+            $(call array_headers,argflag) \
+            $(call array_headers,argoption)
 
 examples/demo: \
     $(LIBBASE)/bool.o \
@@ -105,7 +114,7 @@ examples/demo: \
     $(LIBBASE)/size.o \
     $(LIBSTR)/str.o \
     $(LIBARRAY)/array-str.o \
-    arg-parse.o
+    argparse.o
 
 
 name_from_path = $(subst -,_,$1)
@@ -126,7 +135,7 @@ $(libmaybe_defs): $(LIBMAYBE)/def/maybe-%.h: $(LIBMAYBE)/def.h.jinja
 
 $(libarray_defs): $(LIBARRAY)/def/array-%.h: $(LIBARRAY)/def.h.jinja
 	$(eval n := $(call name_from_path,$*))
-	$(TPLRENDER) $< "$($(n)_type)" $($(n)_options) --sys-headers $($(n)_func_header) -o $@
+	$(TPLRENDER) $< "$($(n)_type)" $($(n)_options) --sys-headers $($(n)_def_header) -o $@
 
 $(libarray_headers): $(LIBARRAY)/array-%.h: $(LIBARRAY)/header.h.jinja
 	$(eval n := $(call name_from_path,$*))
@@ -134,7 +143,7 @@ $(libarray_headers): $(LIBARRAY)/array-%.h: $(LIBARRAY)/header.h.jinja
 
 $(libarray_sources): $(LIBARRAY)/array-%.c: $(LIBARRAY)/source.c.jinja
 	$(eval n := $(call name_from_path,$*))
-	$(TPLRENDER) $< "$($(n)_type)" $($(n)_options) -o $@
+	$(TPLRENDER) $< "$($(n)_type)" $($(n)_options) --sys-headers $($(n)_func_header) -o $@
 
 $(libarray_objects): $(LIBARRAY)/array-%.o: \
     $(LIBARRAY)/array-%.h \

@@ -17,49 +17,44 @@
 // along with Libargs. If not, see <https://gnu.org/licenses/>.
 
 
-#ifndef LIBARGS_ARG_PARSE_H
-#define LIBARGS_ARG_PARSE_H
+#ifndef LIBARGS_ARGPARSE_H
+#define LIBARGS_ARGPARSE_H
 
 
 #include <libarray/def/array-str.h>
 
-#include "types.h"
-
-
-void
-arg_parse_str( char const * const _,
-               char const * const arg,
-               void * const vdest );
+#include "def/argserror.h"
+#include "def/argsspec.h"
 
 
 void
 arg_set_false( char const * const _1,
                char const * const _2,
-               void * const vdest );
+               void * const bool_ptr );
 
 
 void
 arg_set_true( char const * const _1,
               char const * const _2,
-              void * const vdest );
+              void * const bool_ptr );
 
 
 void
-arg_parse( int argc,
-           char const * const * argv,
-           ArgsError * err,
-           ArgSpec spec );
+argparse( int argc,
+          char const * const * argv,
+          ArgsError * err,
+          ArgsSpec spec );
 
 
 void
-arg_parse_array( ArrayC_str args,
-                 ArgsError * err,
-                 ArgSpec spec );
+argparse_array( ArrayC_str args,
+                ArgsError * err,
+                ArgsSpec spec );
 
 
 char const *
 argserrortype__to_str( enum ArgsErrorType );
 
 
-#endif
+#endif // ifndef LIBARGS_ARGPARSE_H
 
