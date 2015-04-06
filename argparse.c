@@ -324,6 +324,7 @@ argparse_array(
             i += parse_positional_args( ap, rest, err );
             if ( err->type != ArgsError_NONE ) { return; }
             npos++;
+            i--; // offset the increment on loop continue:
             continue;
         }
         // If we're here, we have no outstanding positional arguments, and
