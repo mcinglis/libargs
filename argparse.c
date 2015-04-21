@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include <libmacro/assert.h>
+#include <libmacro/debug.h>
 #include <libstr/str.h>
 #include <libarray/array-str.h>
 
@@ -64,15 +65,16 @@ arg_set_true( char const * const _1,
 
 static
 ArgFlag const *
-find_flag_long_match( ArrayC_ArgFlag const flags,
-                      char const * const arg )
+find_flag(
+        ArrayC_ArgFlag const flags,
+        char const * const arg )
 {
     ASSERT( arg != NULL );
 
     for ( size_t i = 0; i < flags.length; i++ ) {
         ArgFlag const * const af = flags.e + i;
-        if ( ( af->long_pattern != NULL && af->long_pattern( arg ) )
-          || ( af->long_name != NULL && str__equal( af->long_name, arg ) ) ) {
+        if ( ( af->pattern != NULL && af->pattern( arg ) )
+          || ( af->name != NULL && str__equal( af->name, arg ) ) ) {
             return af;
         }
     }
@@ -82,49 +84,16 @@ find_flag_long_match( ArrayC_ArgFlag const flags,
 
 static
 ArgOption const *
-find_option_long_match( ArrayC_ArgOption const options,
-                        char const * const arg )
+find_option(
+        ArrayC_ArgOption const options,
+        char const * const arg )
 {
     ASSERT( arg != NULL );
 
     for ( size_t i = 0; i < options.length; i++ ) {
         ArgOption const * const ao = options.e + i;
-        if ( ( ao->long_pattern != NULL && ao->long_pattern( arg ) )
-          || ( ao->long_name != NULL && str__equal( ao->long_name, arg ) ) ) {
-            return ao;
-        }
-    }
-    return NULL;
-}
-
-
-static
-ArgFlag const *
-find_flag_short_match( ArrayC_ArgFlag const flags,
-                       char const * const arg )
-{
-    ASSERT( arg != NULL );
-
-    for ( size_t i = 0; i < flags.length; i++ ) {
-        ArgFlag const * const af = flags.e + i;
-        if ( af->short_name != NULL && str__equal( af->short_name, arg ) ) {
-            return af;
-        }
-    }
-    return NULL;
-}
-
-
-static
-ArgOption const *
-find_option_short_match( ArrayC_ArgOption const options,
-                         char const * const arg )
-{
-    ASSERT( arg != NULL );
-
-    for ( size_t i = 0; i < options.length; i++ ) {
-        ArgOption const * const ao = options.e + i;
-        if ( ao->short_name != NULL && str__equal( ao->short_name, arg ) ) {
+        if ( ( ao->pattern != NULL && ao->pattern( arg ) )
+          || ( ao->name != NULL && str__equal( ao->name, arg ) ) ) {
             return ao;
         }
     }
@@ -164,77 +133,6 @@ under_min( ArgsNum const argsnum,
 }
 
 
-static
-size_t
-parse_option_args( ArgOption const opt,
-                   char const * const arg_name,
-                   ArrayC_str const args,
-                   ArgsError * const err )
-{
-    ASSERT( arrayc_str__is_valid( args ), err != NULL );
-
-    errno = 0;
-    size_t i = 0;
-    for ( ; i < args.length; i++ ) {
-        if ( over_or_eq_max( opt.num_args, i ) ) {
-            break;
-        }
-        char const * const arg = args.e[ i ];
-        if ( str__is_prefix( arg, "-" ) ) {
-            break;
-        }
-        ( opt.parser ? opt.parser : arg_parse_str )
-            ( arg_name, arg, opt.destination );
-        if ( errno ) {
-            *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
-                                  .error = errno,
-                                  .str   = arg };
-            return i;
-        }
-    }
-    if ( under_min( opt.num_args, i ) ) {
-        *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
-                              .str  = arg_name };
-    }
-    return i;
-}
-
-
-static
-size_t
-parse_positional_args( ArgPositional const ap,
-                       ArrayC_str const args,
-                       ArgsError * const err )
-{
-    ASSERT( arrayc_str__is_valid( args ), err != NULL );
-
-    errno = 0;
-    size_t i = 0;
-    for ( ; i < args.length; i++ ) {
-        if ( over_or_eq_max( ap.num_args, i ) ) {
-            break;
-        }
-        char const * const arg = args.e[ i ];
-        if ( str__is_prefix( arg, "-" ) ) {
-            break;
-        }
-        ( ap.parser ? ap.parser : arg_parse_str )
-            ( ap.name, arg, ap.destination );
-        if ( errno ) {
-            *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
-                                  .error = errno,
-                                  .str   = arg };
-            return i;
-        }
-    }
-    if ( under_min( ap.num_args, i ) ) {
-        *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
-                              .str  = ap.name };
-    }
-    return i;
-}
-
-
 void
 argparse(
         int const argc,
@@ -258,84 +156,136 @@ argparse_array(
     ASSERT( arrayc_str__is_valid( args ), err != NULL );
 
     *err = ( ArgsError ){ .type = ArgsError_NONE };
-    size_t npos = 0;
+    size_t num_positionals = 0;
+    // Positional parsing state:
+    ArgPositional const * positional = NULL;
+    size_t positional_arg_count = 0;
+    bool preserve_positional = false;
+    // Option parsing state:
+    ArgOption const * option = NULL;
+    size_t option_arg_count = 0;
+    char const * option_name = NULL;
+    bool preserve_option = false;
+    // Argument parsing loop:
     for ( size_t i = 0; i < args.length; i++ ) {
         char const * const arg = args.e[ i ];
-        // If we're on a long option name:
-        if ( str__is_prefix( arg, "--" ) ) {
-            char const * const arg_name = arg + 2;
-            // Check if any flags match this arg:
-            ArgFlag const * const af =
-                    find_flag_long_match( spec.flags, arg_name );
-            if ( af != NULL ) {
-                ( af->parser ? af->parser : arg_set_true )
-                    ( arg_name, NULL, af->destination );
-                if ( errno ) {
-                    *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
-                                          .error = errno,
-                                          .str   = arg };
+        // Reset positional state if we aren't parsing positional args:
+        if ( !preserve_positional ) {
+            if ( positional != NULL ) {
+                if ( under_min( positional->num_args,
+                                positional_arg_count ) ) {
+                    *err = ( ArgsError ){ .type = ArgsError_MISSING_ARG,
+                                          .str  = positional->name };
                     return;
                 }
-                if ( af->stop ) { return; }
-                continue;
+                num_positionals++;
             }
-            // Check if any options match this arg:
-            ArgOption const * const ao =
-                    find_option_long_match( spec.options, arg_name );
-            if ( ao != NULL ) {
-                ArrayC_str const rest = arrayc_str__drop( args, i + 1 );
-                i += parse_option_args( *ao, arg_name, rest, err );
-                if ( err->type != ArgsError_NONE ) { return; }
-                if ( ao->stop ) { return; }
-                continue;
+            positional = NULL;
+            positional_arg_count = 0;
+        }
+        preserve_positional = false;
+        // Reset option state if we aren't parsing option parameters:
+        if ( !preserve_option ) {
+            if ( option != NULL
+              && under_min( option->num_args, option_arg_count ) ) {
+                *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
+                                      .str  = option_name };
+                return;
             }
-        // Or, if we're on a short option argument:
-        } else if ( str__is_prefix( arg, "-" ) ) {
-            char const * const arg_name = arg + 1;
-            // Check if any flags match this arg:
-            ArgFlag const * const af =
-                    find_flag_short_match( spec.flags, arg_name );
-            if ( af != NULL ) {
-                ( af->parser ? af->parser : arg_set_true )
-                    ( arg_name, NULL, af->destination );
-                if ( errno ) {
-                    *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
-                                          .error = errno,
-                                          .str   = arg };
-                    return;
-                }
-                if ( af->stop ) { return; }
-                continue;
+            option = NULL;
+            option_arg_count = 0;
+            option_name = NULL;
+        }
+        preserve_option = false;
+        // If our argument matches a flag name:
+        ArgFlag const * const flag = find_flag( spec.flags, arg );
+        if ( flag != NULL ) {
+            ( flag->parser ? flag->parser : arg_set_true )
+                ( arg, NULL, flag->destination );
+            if ( errno ) {
+                *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
+                                      .error = errno,
+                                      .str   = arg };
+                return;
             }
-            // Check if any options match this arg:
-            ArgOption const * const ao =
-                    find_option_short_match( spec.options, arg_name );
-            if ( ao != NULL ) {
-                ArrayC_str const rest = arrayc_str__drop( args, i + 1 );
-                i += parse_option_args( *ao, arg_name, rest, err );
-                if ( err->type != ArgsError_NONE ) { return; }
-                if ( ao->stop ) { return; }
-                continue;
-            }
-        // Or, if we have outstanding positional arguments:
-        } else if ( npos < spec.positionals.length ) {
-            ArgPositional const ap = spec.positionals.e[ npos ];
-            ArrayC_str const rest = arrayc_str__drop( args, i );
-            i += parse_positional_args( ap, rest, err );
-            if ( err->type != ArgsError_NONE ) { return; }
-            npos++;
-            i--; // offset the increment on loop continue:
+            if ( flag->stop ) { return; }
             continue;
         }
-        // If we're here, we have no outstanding positional arguments, and
-        // the argument did not start with "-" or "--", so it's an error:
+        // Or, if our argument matches an option name:
+        ArgOption const * const new_option = find_option( spec.options, arg );
+        if ( new_option != NULL ) {
+            if ( option != NULL
+              && under_min( option->num_args, option_arg_count ) ) {
+                *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
+                                      .str  = option_name };
+                return;
+            }
+            option = new_option;
+            option_name = arg;
+            option_arg_count = 0;
+            preserve_option = true;
+            continue;
+        }
+        // Or, if we're parsing option arguments:
+        if ( option != NULL ) {
+            ( option->parser ? option->parser : arg_parse_str )
+                ( option_name, arg, option->destination );
+            if ( errno ) {
+                *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
+                                      .error = errno,
+                                      .str   = arg };
+            }
+            option_arg_count++;
+            preserve_option = !over_or_eq_max( option->num_args,
+                                               option_arg_count );
+            continue;
+        }
+        // Or, if we have outstanding positional arguments:
+        if ( num_positionals < spec.positionals.length ) {
+            positional = spec.positionals.e + num_positionals;
+            ( positional->parser ? positional->parser : arg_parse_str )
+                ( positional->name, arg, positional->destination );
+            if ( errno ) {
+                *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
+                                      .error = errno,
+                                      .str   = arg };
+                return;
+            }
+            positional_arg_count++;
+            preserve_positional = true;
+            continue;
+        }
+        // Otherwise, the argument did not match a specified long/short
+        // flag/option, and we're not parsing option parameters, and there
+        // are no outstanding positional arguments, so it's invalid:
         *err = ( ArgsError ){ .type = ArgsError_UNKNOWN_ARG,
                               .str  = arg };
         return;
     }
-    if ( npos < spec.positionals.length ) {
+    // If we exited the loop on parsing an option, then we need to check that
+    // we parsed enough parameters for that option:
+    if ( option != NULL
+      && under_min( option->num_args, option_arg_count ) ) {
+        *err = ( ArgsError ){ .type = ArgsError_MISSING_OPTION_ARG,
+                              .str  = option_name };
+        return;
+    }
+    // Or, if we exited the loop on parsing a positional, then we won't have
+    // been able to increment `num_positionals` as appropriate:
+    if ( positional != NULL ) {
+        if ( under_min( positional->num_args, positional_arg_count ) ) {
+            *err = ( ArgsError ){ .type = ArgsError_MISSING_ARG,
+                                  .str  = positional->name };
+            return;
+        }
+        num_positionals++;
+    }
+    // If we parsed fewer than the specified number of positionals, error:
+    if ( num_positionals < spec.positionals.length ) {
         *err = ( ArgsError ){ .type = ArgsError_MISSING_ARG,
-                              .str  = spec.positionals.e[ npos ].name };
+                              .str  = spec.positionals
+                                          .e[ num_positionals ].name };
+        return;
     }
 }
 

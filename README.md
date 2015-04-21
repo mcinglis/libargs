@@ -1,9 +1,9 @@
 
-**Libargs** provides an `arg_parse()` function for parsing arguments according to a given specification:
+**Libargs** provides an `argparse()` function for parsing arguments according to a given specification:
 
 ``` c
 ArgsError err = { .type = ArgsError_NONE };
-arg_parse( argc, argv, &err, ( ArgSpec ){
+argparse( argc, argv, &err, ( ArgSpec ){
     .positionals = ARRAY_ARGPOSITIONAL(
         { .name        = "system-id",
           .destination = &system_id
@@ -13,25 +13,25 @@ arg_parse( argc, argv, &err, ( ArgSpec ){
         }
     ),
     .flags = ARRAY_ARGFLAG(
-        { .long_name   = "version",
+        { .name        = "--version",
           .destination = &got_version
         }
     ),
     .options = ARRAY_ARGOPTION(
-        { .long_name   = "widget-file",
+        { .name        = "--widget-file",
           .destination = &widget_file
         },
-        { .short_name  = "t",
-          .long_name   = "time-range",
-          .destination = &time_range,
-          .parser      = arg_parse_intmax
+        { .name        = "--times",
+          .destination = &times,
+          .num_args    = { .min = ArgsNum_NONE, .max = ArgsNum_INFINITE },
+          .parser      = intmax__arg_parse
         }
     )
 } );
 if ( err.type != ArgsError_NONE ) {
     // handle error
 }
-// use values set from `arg_parse`...
+// use values set from `argparse()`...
 ```
 
 See [`examples/demo.c`](examples/demo.c) for a full example.
@@ -55,9 +55,7 @@ $ puck execute build
 
 There's nothing magic to what Puck does, so if you would prefer, you can set up the dependencies manually. You just need to have the dependencies in the `deps` directory within the Libargs directory, and have them built (if necessary) before building Libargs.
 
-There is no `build` command specified for Libargs, because you should manage the building of Libargs' sources in your own project. The dependencies rely on generated source files, and you would want to have that process integrated with the rest of your project, avoiding multiple libraries trying to generate the same file differently.
-
-Despite this, there is a `Makefile` provided with the bare minimum to build the object files. This is primarly to aid in development; checking that the code can actually compile.
+There is no `build` command specified for Libargs, because you should manage the building of Libargs' sources in your own project. The dependencies rely on generated source files, and you would want to have that process integrated with the rest of your project, avoiding multiple libraries trying to generate the same file differently. Nonetheless, there is a `Makefile` provided that will build the object files and example programs.
 
 
 ## Collaboration

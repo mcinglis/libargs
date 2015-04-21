@@ -45,25 +45,22 @@ main( int const argc,
               .destination = &something }
         ),
         .flags = ARRAY_ARGFLAG(
-            { .short_name = "f",
-              .long_name = "foo",
+            { .name        = "--foo",
               .destination = &foo
             },
-            { .long_name = "bar",
+            { .name        = "--bar",
               .destination = &bar,
-              .parser = arg_set_false
+              .parser      = arg_set_false
             },
-            { .short_name = "h",
-              .long_name = "help",
-              .destination = &got_help_flag }
+            { .name        = "--help",
+              .destination = &got_help_flag
+            }
         ),
         .options = ARRAY_ARGOPTION(
-            { .short_name  = "b",
-              .long_name   = "bazqux",
+            { .name        = "--bazqux",
               .destination = &bazqux
             },
-            { .short_name  = "w",
-              .long_name   = "widgets",
+            { .name        = "--widgets",
               .parser      = parse_widgets,
               .destination = widgets,
               .num_args    = { .min = 2, .max = 4 }
@@ -72,21 +69,23 @@ main( int const argc,
     } );
     if ( got_help_flag ) {
         printf( "%s <something>\n"
-                "        [-h|--help] [-f|--foo] [--bar]\n"
-                "        [-b|--bazqux <str>]\n"
-                "        [-w|--widgets <n> <n> [<n> [<n>]]\n",
+                "        [--help] [--foo] [--bar]\n"
+                "        [--bazqux <str>]\n"
+                "        [--widgets <n> <n> [<n> [<n>]]\n",
                 argv[ 0 ] );
     } else if ( err.type == ArgsError_NONE ) {
         printf( "something = %s\n", something );
-        printf( "foo = %s\n", bool__to_str( foo ) );
-        printf( "bar = %s\n", bool__to_str( bar ) );
-        printf( "bazqux = %s\n", bazqux ? bazqux : "(null)" );
-        printf( "widgets = %d %d %d %d\n",
+        printf( "foo       = %s\n", bool__to_str( foo ) );
+        printf( "bar       = %s\n", bool__to_str( bar ) );
+        printf( "bazqux    = %s\n", bazqux ? bazqux : "(null)" );
+        printf( "widgets   = %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ], widgets[ 3 ] );
     } else {
-        printf( "ERROR! %s (str=%s) (errno=%d (%s)); use --help\n",
-                argserrortype__to_str( err.type ), err.str,
-                errno, strerror( errno ) );
+        printf( "ERROR: %s for `%s`", argserrortype__to_str( err.type ), err.str );
+        if ( errno ) {
+            printf( " (errno=%d: %s)", errno, strerror( errno ) );
+        }
+        printf( "\nPass `--help` to see usage.\n" );
     }
 }
 

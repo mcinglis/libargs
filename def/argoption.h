@@ -28,9 +28,8 @@
 
 typedef struct argoption {
     ArgsNum num_args;
-    char const * short_name;
-    char const * long_name;
-    bool ( * long_pattern )( char const * name );
+    char const * name;
+    bool ( * pattern )( char const * name );
     void * destination;
     void ( * parser )( char const * name,
                        char const * arg,
