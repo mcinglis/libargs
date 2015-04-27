@@ -14,7 +14,10 @@ argparse( argc, argv, &err, ( ArgSpec ){
     ),
     .flags = ARRAY_ARGFLAG(
         { .name        = "--version",
-          .destination = &got_version
+          .destination = &got_version_flag
+        },
+        { .names       = ( char const * [] ){ "-h", "--help", NULL },
+          .destination = &got_help_flag
         }
     ),
     .options = ARRAY_ARGOPTION(

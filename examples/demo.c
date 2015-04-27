@@ -52,7 +52,7 @@ main( int const argc,
               .destination = &bar,
               .parser      = arg_set_false
             },
-            { .name        = "--help",
+            { .names       = ( char const * [] ){ "--help", "-h", NULL },
               .destination = &got_help_flag
             }
         ),
@@ -69,7 +69,7 @@ main( int const argc,
     } );
     if ( got_help_flag ) {
         printf( "%s <something>\n"
-                "        [--help] [--foo] [--bar]\n"
+                "        [-h|--help] [--foo] [--bar]\n"
                 "        [--bazqux <str>]\n"
                 "        [--widgets <n> <n> [<n> [<n>]]\n",
                 argv[ 0 ] );

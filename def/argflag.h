@@ -25,8 +25,9 @@
 
 
 typedef struct argflag {
-    char const * name;
     bool ( * pattern )( char const * name );
+    char const * const * names;
+    char const * name;
     void * destination;
     void ( * parser )( char const * name,
                        char const * arg,

@@ -64,6 +64,23 @@ arg_set_true( char const * const _1,
 
 
 static
+bool
+str_one_of(
+        char const * const xs,
+        char const * const * const yss )
+{
+    ASSERT( xs != NULL, yss != NULL );
+
+    for ( size_t i = 0; yss[ i ] != NULL; i++ ) {
+        if ( str__equal( xs, yss[ i ] ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+static
 ArgFlag const *
 find_flag(
         ArrayC_ArgFlag const flags,
@@ -74,6 +91,7 @@ find_flag(
     for ( size_t i = 0; i < flags.length; i++ ) {
         ArgFlag const * const af = flags.e + i;
         if ( ( af->pattern != NULL && af->pattern( arg ) )
+          || ( af->names != NULL && str_one_of( arg, af->names ) )
           || ( af->name != NULL && str__equal( af->name, arg ) ) ) {
             return af;
         }
@@ -93,6 +111,7 @@ find_option(
     for ( size_t i = 0; i < options.length; i++ ) {
         ArgOption const * const ao = options.e + i;
         if ( ( ao->pattern != NULL && ao->pattern( arg ) )
+          || ( ao->names != NULL && str_one_of( arg, ao->names ) )
           || ( ao->name != NULL && str__equal( ao->name, arg ) ) ) {
             return ao;
         }
