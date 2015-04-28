@@ -271,7 +271,8 @@ argparse_array(
                 return;
             }
             positional_arg_count++;
-            preserve_positional = true;
+            preserve_positional = !over_or_eq_max( positional->num_args,
+                                                   positional_arg_count );
             continue;
         }
         // Otherwise, the argument did not match a specified long/short
