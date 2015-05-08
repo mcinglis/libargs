@@ -32,8 +32,9 @@ arg_parse_str( char const * const _,
                char const * const arg,
                void * const vdest )
 {
-    ASSERT( arg != NULL, vdest != NULL );
+    ASSERT( arg != NULL );
 
+    if ( vdest == NULL ) { return; }
     char const * * const dest = vdest;
     *dest = arg;
 }
