@@ -52,7 +52,7 @@ main( int const argc,
               .destination = &bar,
               .parser      = arg_set_false
             },
-            { .names       = ( char const * [] ){ "--help", "-h", NULL },
+            { .names       = ARRAY_STR( "--help", "-h" ),
               .destination = &got_help_flag
             }
         ),
@@ -60,7 +60,7 @@ main( int const argc,
             { .name        = "--bazqux",
               .destination = &bazqux
             },
-            { .name        = "--widgets",
+            { .names       = ARRAY_STR( "--widgets", "-w" ),
               .parser      = parse_widgets,
               .destination = widgets,
               .num_args    = { .min = 2, .max = 4 }
@@ -71,7 +71,7 @@ main( int const argc,
         printf( "%s <something>\n"
                 "        [-h|--help] [--foo] [--bar]\n"
                 "        [--bazqux <str>]\n"
-                "        [--widgets <n> <n> [<n> [<n>]]\n",
+                "        [-w|--widgets <n> <n> [<n> [<n>]]\n",
                 argv[ 0 ] );
     } else if ( err.type == ArgsError_NONE ) {
         printf( "something = %s\n", something );
@@ -81,7 +81,8 @@ main( int const argc,
         printf( "widgets   = %d %d %d %d\n",
                 widgets[ 0 ], widgets[ 1 ], widgets[ 2 ], widgets[ 3 ] );
     } else {
-        printf( "ERROR: %s for `%s`", argserrortype__to_str( err.type ), err.str );
+        printf( "ERROR: %s, from `%s`",
+                argserrortype__to_str( err.type ), err.str );
         if ( errno ) {
             printf( " (errno=%d: %s)", errno, strerror( errno ) );
         }

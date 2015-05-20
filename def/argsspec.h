@@ -21,9 +21,9 @@
 #define LIBARGS_DEF_ARGSSPEC_H
 
 
-#include <libarray/def/array-argpositional.h>
-#include <libarray/def/array-argflag.h>
-#include <libarray/def/array-argoption.h>
+#include <libarray/def/array_argpositional.h>
+#include <libarray/def/array_argflag.h>
+#include <libarray/def/array_argoption.h>
 
 
 typedef struct argsspec {

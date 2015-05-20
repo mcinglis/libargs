@@ -21,7 +21,7 @@
 #define LIBARGS_ARGPARSE_H
 
 
-#include <libarray/def/array-str.h>
+#include <libarray/def/array_str.h>
 
 #include "def/argserror.h"
 #include "def/argsspec.h"

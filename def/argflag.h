@@ -22,11 +22,12 @@
 
 
 #include <libtypes/types.h>
+#include <libarray/def/array_str.h>
 
 
 typedef struct argflag {
     bool ( * pattern )( char const * name );
-    char const * const * names;
+    ArrayC_str names;
     char const * name;
     void * destination;
     void ( * parser )( char const * name,

@@ -24,13 +24,14 @@
 #include <libmacro/assert.h>
 #include <libmacro/debug.h>
 #include <libstr/str.h>
-#include <libarray/array-str.h>
+#include <libarray/array_str.h>
 
 
 void
-arg_parse_str( char const * const _,
-               char const * const arg,
-               void * const vdest )
+arg_parse_str(
+        char const * const _,
+        char const * const arg,
+        void * const vdest )
 {
     ASSERT( arg != NULL );
 
@@ -41,9 +42,10 @@ arg_parse_str( char const * const _,
 
 
 void
-arg_set_false( char const * const _1,
-               char const * const _2,
-               void * const vdest )
+arg_set_false(
+        char const * const _1,
+        char const * const _2,
+        void * const vdest )
 {
     ASSERT( vdest != NULL );
 
@@ -53,31 +55,15 @@ arg_set_false( char const * const _1,
 
 
 void
-arg_set_true( char const * const _1,
-              char const * const _2,
-              void * const vdest )
+arg_set_true(
+        char const * const _1,
+        char const * const _2,
+        void * const vdest )
 {
     ASSERT( vdest != NULL );
 
     bool * const dest = vdest;
     *dest = true;
-}
-
-
-static
-bool
-str_one_of(
-        char const * const xs,
-        char const * const * const yss )
-{
-    ASSERT( xs != NULL, yss != NULL );
-
-    for ( size_t i = 0; yss[ i ] != NULL; i++ ) {
-        if ( str__equal( xs, yss[ i ] ) ) {
-            return true;
-        }
-    }
-    return false;
 }
 
 
@@ -92,7 +78,7 @@ find_flag(
     for ( size_t i = 0; i < flags.length; i++ ) {
         ArgFlag const * const af = flags.e + i;
         if ( ( af->pattern != NULL && af->pattern( arg ) )
-          || ( af->names != NULL && str_one_of( arg, af->names ) )
+          || arrayc_str__elem( af->names, arg )
           || ( af->name != NULL && str__equal( af->name, arg ) ) ) {
             return af;
         }
@@ -112,7 +98,7 @@ find_option(
     for ( size_t i = 0; i < options.length; i++ ) {
         ArgOption const * const ao = options.e + i;
         if ( ( ao->pattern != NULL && ao->pattern( arg ) )
-          || ( ao->names != NULL && str_one_of( arg, ao->names ) )
+          || arrayc_str__elem( ao->names, arg )
           || ( ao->name != NULL && str__equal( ao->name, arg ) ) ) {
             return ao;
         }
@@ -123,8 +109,9 @@ find_option(
 
 static
 bool
-over_or_eq_max( ArgsNum const argsnum,
-                size_t const i )
+over_or_eq_max(
+        ArgsNum const argsnum,
+        size_t const i )
 {
     if ( argsnum.max == ArgsNum_NONE ) {
         return true;
@@ -140,8 +127,9 @@ over_or_eq_max( ArgsNum const argsnum,
 
 static
 bool
-under_min( ArgsNum const argsnum,
-           size_t const i )
+under_min(
+        ArgsNum const argsnum,
+        size_t const i )
 {
     if ( argsnum.min == ArgsNum_NONE ) {
         return false;
@@ -162,7 +150,7 @@ argparse(
 {
     ASSERT( argc >= 1, argv != NULL, err != NULL );
 
-    ArrayC_str const args = { .e = argv + 1, .length = argc - 1 };
+    ArrayC_str const args = arrayc_str__new( argv + 1, argc - 1 );
     argparse_array( args, err, spec );
 }
 
@@ -254,6 +242,7 @@ argparse_array(
                 *err = ( ArgsError ){ .type  = ArgsError_PARSE_ARG,
                                       .error = errno,
                                       .str   = arg };
+                return;
             }
             option_arg_count++;
             preserve_option = !over_or_eq_max( option->num_args,
@@ -312,7 +301,8 @@ argparse_array(
 
 
 char const *
-argserrortype__to_str( enum ArgsErrorType const t )
+argserrortype__to_str(
+        enum ArgsErrorType const t )
 {
     switch ( t ) {
         case ArgsError_NONE:               return "none";
@@ -323,7 +313,7 @@ argserrortype__to_str( enum ArgsErrorType const t )
         case ArgsError_MISSING_OPTION_ARG: return "missing option argument";
         case ArgsError_INCONSISTENT_ARG:   return "inconsistent argument";
         case ArgsError_SYSTEM:             return "system error";
-        default:                           return "unknown";
+        default:                           return "unknown error type";
     }
 }
 

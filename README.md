@@ -16,7 +16,7 @@ argparse( argc, argv, &err, ( ArgSpec ){
         { .name        = "--version",
           .destination = &got_version_flag
         },
-        { .names       = ( char const * [] ){ "-h", "--help", NULL },
+        { .names       = ARRAY_STR( "--help", "-h" ),
           .destination = &got_help_flag
         }
     ),
@@ -24,10 +24,10 @@ argparse( argc, argv, &err, ( ArgSpec ){
         { .name        = "--widget-file",
           .destination = &widget_file
         },
-        { .name        = "--times",
+        { .names       = ARRAY_STR( "--times", "-t" ),
           .destination = &times,
           .num_args    = { .min = ArgsNum_NONE, .max = ArgsNum_INFINITE },
-          .parser      = intmax__arg_parse
+          .parser      = time__arg_parse
         }
     )
 } );
