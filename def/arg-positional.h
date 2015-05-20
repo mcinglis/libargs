@@ -21,7 +21,7 @@
 #define LIBARGS_DEF_ARGPOSITIONAL_H
 
 
-#include "argsnum.h"
+#include "args-num.h"
 
 
 typedef struct argpositional {

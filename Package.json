@@ -20,6 +20,11 @@
                     "https://gitorious.org/mcinglis/libstr.git" ],
           "tag":  "v1.*"
         },
+        { "repo": [ "https://bitbucket.org/mcinglis/libmaybe.git",
+                    "https://github.com/mcinglis/libmaybe.git",
+                    "https://gitorious.org/mcinglis/libmaybe.git" ],
+          "tag":  "v1.*"
+        },
         { "repo": [ "https://bitbucket.org/mcinglis/libarray.git",
                     "https://github.com/mcinglis/libarray.git",
                     "https://gitorious.org/mcinglis/libarray.git" ],

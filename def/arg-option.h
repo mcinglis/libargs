@@ -24,7 +24,7 @@
 #include <libtypes/types.h>
 #include <libarray/def/array_str.h>
 
-#include "argsnum.h"
+#include "args-num.h"
 
 
 typedef struct argoption {

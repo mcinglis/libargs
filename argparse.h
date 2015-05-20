@@ -23,8 +23,8 @@
 
 #include <libarray/def/array_str.h>
 
-#include "def/argserror.h"
-#include "def/argsspec.h"
+#include "def/args-error.h"
+#include "def/args-spec.h"
 
 
 void
