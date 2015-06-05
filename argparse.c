@@ -37,7 +37,13 @@ arg_parse_str(
 
     if ( vdest == NULL ) { return; }
     char const * * const dest = vdest;
-    *dest = arg;
+    // Empty strings are, by default, invalid arguments:
+    if ( str__is_empty( *dest ) ) {
+        errno = EINVAL;
+    } else {
+        errno = 0;
+        *dest = arg;
+    }
 }
 
 
