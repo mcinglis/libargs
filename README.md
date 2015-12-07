@@ -1,5 +1,5 @@
 
-**Libargs** provides an `argparse()` function for parsing arguments according to a given specification:
+**Libargs** provides functions for parsing arguments according to a declarative specification:
 
 ``` c
 ArgsError err = { .type = ArgsError_NONE };
@@ -49,7 +49,7 @@ Every version tag will be signed with [my GPG key](http://pool.sks-keyservers.ne
 
 ## Dependencies
 
-`Package.json` specifies the dependencies of Libargs: where to get them, and what version to use. I've developed a tool called [Puck](https://gitorious.org/mcinglis/puck) that will parse such a `Package.json`, download the specified repositories, check out the specified version, and, if the dependency has its own `Package.json`, repeat that process for *its* dependencies. With `puck` on your PATH, in the directory of Libargs:
+`Package.json` specifies the dependencies of Libargs: where to get them, and what version to use. I've developed a tool called [Puck](https://bitbucket.org/mcinglis/puck) that will parse such a `Package.json`, download the specified repositories, check out the specified version, and, if the dependency has its own `Package.json`, repeat that process for *its* dependencies. With `puck` on your PATH, in the directory of Libargs:
 
 ``` sh
 $ puck update
@@ -88,7 +88,7 @@ You should have received a copy of the GNU Affero General Public License along w
 
 [I believe that nonfree software is harmful](http://minglis.id.au/blog/2014/04/09/free-software-free-society.html), and I don't want to contribute to its development at all. I believe that a free society must necessarily operate on free software. I want to encourage the development of free software, and discourage the development of nonfree software.
 
-The [GPL](https://gnu.org/licenses/gpl.html) was designed to ensure that the software stays free software; "to ensure that every user has freedom". The GPL's protections may have sufficed in 1990, but they don't in 2014. The GPL doesn't consider users of a web service to be users of the software implementing that server. Thankfully, the AGPL does.
+The [GPL](https://gnu.org/licenses/gpl.html) was designed to ensure that the software stays free software; "to ensure that every user has freedom". The GPL's protections may have sufficed in 1990, but they don't in 2015. The GPL doesn't consider users of a web service to be users of the software implementing that server. Thankfully, the AGPL does.
 
 The AGPL ensures that if Libargs is used to implement a web service, then the entire source code of that web service must be free software. This way, I'm not contributing to nonfree software, whether it's executed locally or provided over a network.
 
